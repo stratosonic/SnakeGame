@@ -14,9 +14,11 @@ public class Snake {
 	private int myBlockSize;
 	private boolean myCollidedWithWall = false;
 
-	public Snake(int width, int height) {
+	public Snake(int width, int height, int blockSize) {
 		this.width = width;
 		this.height = height;
+		this.myBlockSize = blockSize;
+		this.myDirection = Direction.RIGHT;
 	}
 
 	public void snakeUpdate() {

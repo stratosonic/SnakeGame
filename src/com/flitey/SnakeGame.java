@@ -5,14 +5,18 @@ import java.util.TimerTask;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class SnakeGame extends Application {
@@ -28,12 +32,16 @@ public class SnakeGame extends Application {
 	private static final int WINDOW_WIDTH = 400;
 	private static final int GRID_BLOCK_SIZE = 10;
 
+	GraphicsContext graphicsContext;
+	Button startButton;
+
 	Snake snake;
 	Grid grid;
 	AnimationTimer animationTimer;
 	Timer timer;
 	TimerTask task;
 
+	private boolean isGameInProgress = false;
 	private boolean isGameOver = false;
 	private boolean isPaused = false;
 
@@ -43,16 +51,46 @@ public class SnakeGame extends Application {
 		primaryStage.setTitle("Snake");
 		Group root = new Group();
 		Canvas canvas = new Canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
-		GraphicsContext gc = canvas.getGraphicsContext2D();
+		graphicsContext = canvas.getGraphicsContext2D();
 		root.getChildren().add(canvas);
 		Scene scene = new Scene(root);
 
 		grid = new Grid(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_BLOCK_SIZE);
 
-		snake = new Snake(WINDOW_WIDTH, WINDOW_HEIGHT);
-		snake.setBlockSize(GRID_BLOCK_SIZE);
+		snake = new Snake(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_BLOCK_SIZE);
 		snake.setHeadLocation(GRID_BLOCK_SIZE, GRID_BLOCK_SIZE);
-		snake.setDirection(Direction.RIGHT);
+
+		drawGrid();
+
+		startButton = new Button("Start!");
+		startButton.setMinWidth(100);
+		startButton.setMinHeight(36);
+
+		VBox vBox = new VBox();
+		vBox.prefWidthProperty().bind(canvas.widthProperty());
+		vBox.prefHeightProperty().bind(canvas.heightProperty());
+		vBox.setAlignment(Pos.CENTER);
+		vBox.getChildren().add(startButton);
+
+		startButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				isGameInProgress = true;
+				isGameOver = false;
+				startButton.setVisible(false);
+
+				// if the timer is null, this is restarting after a game ended. Otherwise it is
+				// the first game.
+				if (timer == null) {
+					task = createTimerTask();
+					timer = new Timer("Timer");
+					timer.scheduleAtFixedRate(task, TASK_UPDATE_DELAY_MS, TASK_UPDATE_PERIOD_MS);
+					animationTimer.start();
+				}
+			}
+		});
+
+		root.getChildren().add(vBox);
 
 		scene.setOnKeyPressed((e) -> {
 			if (e.getCode() == KeyCode.UP) {
@@ -64,6 +102,7 @@ public class SnakeGame extends Application {
 			} else if (e.getCode() == KeyCode.RIGHT) {
 				snake.setDirection(Direction.RIGHT);
 			} else if (e.getCode() == KeyCode.P) {
+
 				if (isPaused) {
 					task = createTimerTask();
 					timer = new Timer("Timer");
@@ -82,13 +121,17 @@ public class SnakeGame extends Application {
 		animationTimer = new AnimationTimer() {
 			@Override
 			public void handle(long timestamp) {
-				if (isGameOver) {
+				if (isGameInProgress) {
+					drawGrid();
+					drawSnake();
+					drawFood();
+				} else if (isGameOver) {
 					animationTimer.stop();
 					showEndGameAlert();
-				} else {
-					drawGrid(gc);
-					drawSnake(gc);
-					drawFood(gc);
+					startButton.setVisible(true);
+					grid.reset();
+					snake = new Snake(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_BLOCK_SIZE);
+					snake.setHeadLocation(GRID_BLOCK_SIZE, GRID_BLOCK_SIZE);
 				}
 			}
 		};
@@ -101,7 +144,6 @@ public class SnakeGame extends Application {
 
 	@Override
 	public void stop() {
-		System.out.println("stopping");
 		if (timer != null) {
 			timer.cancel();
 		}
@@ -111,19 +153,21 @@ public class SnakeGame extends Application {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {
-				snake.snakeUpdate();
+				if (isGameInProgress) {
+					snake.snakeUpdate();
 
-				if (snake.collidedWithWall()) {
-					endGame("collided with wall");
-				} else if (snake.collidedWithTail()) {
-					endGame("collided with tail");
-				}
+					if (snake.collidedWithWall()) {
+						endGame("collided with wall");
+					} else if (snake.collidedWithTail()) {
+						endGame("collided with tail");
+					}
 
-				boolean foundFood = grid.foundFood(snake);
-				if (foundFood) {
-					snake.addTailSegment();
-					grid.addFood();
-					System.out.println("Snake length: " + snake.getTail().size());
+					boolean foundFood = grid.foundFood(snake);
+					if (foundFood) {
+						snake.addTailSegment();
+						grid.addFood();
+						System.out.println("Snake length: " + snake.getTail().size());
+					}
 				}
 			}
 		};
@@ -132,53 +176,57 @@ public class SnakeGame extends Application {
 
 	private void endGame(String reason) {
 		timer.cancel();
+		timer = null;
+		isGameInProgress = false;
 		isGameOver = true;
 		System.out.println("Game over: " + reason);
 	}
 
 	private void showEndGameAlert() {
-		Alert alertDialog = new Alert(AlertType.INFORMATION);
-		alertDialog.setTitle("Game Over");
-		alertDialog.setHeaderText("Game over. Your final snake length was: " + (snake.getTail().size() + 1) + ".");
-		alertDialog.setContentText("Press OK to start a new game");
+		String gameOverText = "Game Over! Score: " + (snake.getTail().size() + 1);
+		double textWidth = getTextWidth(gameOverText);
 
-		alertDialog.show();
+		graphicsContext.setFill(Color.BLACK);
+		graphicsContext.fillText(gameOverText, (WINDOW_WIDTH / 2) - (textWidth / 2), WINDOW_HEIGHT / 2 - 24);
 	}
 
-	private void drawGrid(GraphicsContext gc) {
+	private double getTextWidth(String string) {
+		Text text = new Text(string);
+		new Scene(new Group(text));
+		text.applyCss();
+		return text.getLayoutBounds().getWidth();
+	}
 
-		gc.setFill(Color.WHITE);
-		gc.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	private void drawGrid() {
+		graphicsContext.setFill(Color.WHITE);
+		graphicsContext.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-		gc.setStroke(Color.LIGHTGRAY);
-		gc.setLineWidth(0.5);
+		graphicsContext.setStroke(Color.LIGHTGRAY);
+		graphicsContext.setLineWidth(0.5);
 
 		for (int x = 0; x < WINDOW_WIDTH; x += GRID_BLOCK_SIZE) {
-			gc.strokeLine(x, 0, x, x + WINDOW_HEIGHT);
+			graphicsContext.strokeLine(x, 0, x, x + WINDOW_HEIGHT);
 		}
 
 		for (int y = 0; y < WINDOW_HEIGHT; y += GRID_BLOCK_SIZE) {
-			gc.strokeLine(0, y, y + WINDOW_WIDTH, y);
+			graphicsContext.strokeLine(0, y, y + WINDOW_WIDTH, y);
 		}
-
 	}
 
-	private void drawSnake(GraphicsContext gc) {
-
-		gc.setFill(Color.GREEN);
-		gc.fillRect(snake.getHeadLocation().getX(), snake.getHeadLocation().getY(), snake.getBlockSize(),
+	private void drawSnake() {
+		graphicsContext.setFill(Color.GREEN);
+		graphicsContext.fillRect(snake.getHeadLocation().getX(), snake.getHeadLocation().getY(), snake.getBlockSize(),
 				snake.getBlockSize());
 		for (Point tailSegment : snake.getTail()) {
-			gc.fillRect(tailSegment.getX(), tailSegment.getY(), snake.getBlockSize(), snake.getBlockSize());
+			graphicsContext.fillRect(tailSegment.getX(), tailSegment.getY(), snake.getBlockSize(),
+					snake.getBlockSize());
 		}
 	}
 
-	private void drawFood(GraphicsContext gc) {
-
-		gc.setFill(Color.BLUE);
-
-		gc.fillRect(grid.getFood().getLocation().getX(), grid.getFood().getLocation().getY(), GRID_BLOCK_SIZE,
-				GRID_BLOCK_SIZE);
-
+	private void drawFood() {
+		graphicsContext.setFill(Color.BLUE);
+		graphicsContext.fillRect(grid.getFood().getLocation().getX(), grid.getFood().getLocation().getY(),
+				GRID_BLOCK_SIZE, GRID_BLOCK_SIZE);
 	}
+
 }

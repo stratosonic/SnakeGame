@@ -15,6 +15,10 @@ public class Grid {
 		food = new Food(width / 2, height / 2);
 	}
 
+	public void reset() {
+		food = new Food(width / 2, height / 2);
+	}
+
 	public boolean foundFood(Snake snake) {
 		boolean isIntersected = false;
 
