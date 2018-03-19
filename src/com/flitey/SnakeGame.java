@@ -102,7 +102,6 @@ public class SnakeGame extends Application {
 			} else if (e.getCode() == KeyCode.RIGHT) {
 				snake.setDirection(Direction.RIGHT);
 			} else if (e.getCode() == KeyCode.P) {
-
 				if (isPaused) {
 					task = createTimerTask();
 					timer = new Timer("Timer");
