@@ -2,28 +2,28 @@ package com.flitey;
 
 public class Point {
 
-	private int myX;
-	private int myY;
+	private int x;
+	private int y;
 
 	public Point(int x, int y) {
-		myX = x;
-		myY = y;
+		this.x = x;
+		this.y = y;
 	}
 
 	public int getX() {
-		return myX;
+		return x;
 	}
 
 	public void setX(int x) {
-		this.myX = x;
+		this.x = x;
 	}
 
 	public int getY() {
-		return myY;
+		return y;
 	}
 
 	public void setY(int y) {
-		this.myY = y;
+		this.y = y;
 	}
 
 	@Override
@@ -35,15 +35,15 @@ public class Point {
 		if (getClass() != obj.getClass())
 			return false;
 		Point other = (Point) obj;
-		if (myX != other.myX)
+		if (x != other.x)
 			return false;
-		if (myY != other.myY)
+		if (y != other.y)
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Point [x=" + myX + ", y=" + myY + "]";
+		return "Point [x=" + x + ", y=" + y + "]";
 	}
 }

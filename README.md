@@ -1,1 +1,1 @@
-This is an implementation of the classic snake game using JavaFX.
+This is an implementation of the classic snake game using JavaFX. Written using the Eclipse IDE.

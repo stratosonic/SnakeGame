@@ -5,59 +5,58 @@ import java.util.List;
 
 public class Snake {
 
-	private Direction myDirection;
-	private int mySpeed;
-	private Point myHeadLocation = new Point(0, 0);
-	private List<Point> myTail = new ArrayList<Point>();
+	private Direction direction;
+	private Point headLocation = new Point(0, 0);
+	private List<Point> tail = new ArrayList<Point>();
 	private int height;
 	private int width;
-	private int myBlockSize;
-	private boolean myCollidedWithWall = false;
+	private int blockSize;
+	private boolean isCollidedWithWall = false;
 
 	public Snake(int width, int height, int blockSize) {
 		this.width = width;
 		this.height = height;
-		this.myBlockSize = blockSize;
-		this.myDirection = Direction.RIGHT;
+		this.blockSize = blockSize;
+		this.direction = Direction.RIGHT;
 	}
 
 	public void snakeUpdate() {
 
-		if (myTail.size() > 0) {
-			myTail.remove(myTail.size() - 1);
-			myTail.add(0, new Point(myHeadLocation.getX(), myHeadLocation.getY()));
+		if (tail.size() > 0) {
+			tail.remove(tail.size() - 1);
+			tail.add(0, new Point(headLocation.getX(), headLocation.getY()));
 		}
 
-		switch (myDirection) {
+		switch (direction) {
 		case UP:
-			myHeadLocation.setY(myHeadLocation.getY() - myBlockSize);
-			if (myHeadLocation.getY() < 0) {
-				myCollidedWithWall = true;
-				myHeadLocation.setY(0);
+			headLocation.setY(headLocation.getY() - blockSize);
+			if (headLocation.getY() < 0) {
+				isCollidedWithWall = true;
+				headLocation.setY(0);
 			}
 			break;
 
 		case DOWN:
-			myHeadLocation.setY(myHeadLocation.getY() + myBlockSize);
-			if (myHeadLocation.getY() >= height) {
-				myCollidedWithWall = true;
-				myHeadLocation.setY(height - myBlockSize);
+			headLocation.setY(headLocation.getY() + blockSize);
+			if (headLocation.getY() >= height) {
+				isCollidedWithWall = true;
+				headLocation.setY(height - blockSize);
 			}
 			break;
 
 		case LEFT:
-			myHeadLocation.setX(myHeadLocation.getX() - myBlockSize);
-			if (myHeadLocation.getX() < 0) {
-				myCollidedWithWall = true;
-				myHeadLocation.setX(0);
+			headLocation.setX(headLocation.getX() - blockSize);
+			if (headLocation.getX() < 0) {
+				isCollidedWithWall = true;
+				headLocation.setX(0);
 			}
 			break;
 
 		case RIGHT:
-			myHeadLocation.setX(myHeadLocation.getX() + myBlockSize);
-			if (myHeadLocation.getX() >= width) {
-				myCollidedWithWall = true;
-				myHeadLocation.setX(width - myBlockSize);
+			headLocation.setX(headLocation.getX() + blockSize);
+			if (headLocation.getX() >= width) {
+				isCollidedWithWall = true;
+				headLocation.setX(width - blockSize);
 			}
 			break;
 
@@ -67,14 +66,14 @@ public class Snake {
 	}
 
 	public boolean collidedWithWall() {
-		return myCollidedWithWall;
+		return isCollidedWithWall;
 	}
 
 	public boolean collidedWithTail() {
 		boolean isCollision = false;
 
-		for (Point tailSegment : myTail) {
-			if (myHeadLocation.equals(tailSegment)) {
+		for (Point tailSegment : tail) {
+			if (headLocation.equals(tailSegment)) {
 				isCollision = true;
 				break;
 			}
@@ -84,45 +83,29 @@ public class Snake {
 	}
 
 	public void addTailSegment() {
-		myTail.add(0, new Point(myHeadLocation.getX(), myHeadLocation.getY()));
+		tail.add(0, new Point(headLocation.getX(), headLocation.getY()));
 		System.out.println("Add tail segment");
 	}
 
-	public Direction getDirection() {
-		return myDirection;
-	}
-
 	public void setDirection(Direction myDirection) {
-		this.myDirection = myDirection;
-	}
-
-	public int getSpeed() {
-		return mySpeed;
-	}
-
-	public void setSpeed(int speed) {
-		this.mySpeed = speed;
+		this.direction = myDirection;
 	}
 
 	public int getBlockSize() {
-		return myBlockSize;
-	}
-
-	public void setBlockSize(int blockSize) {
-		this.myBlockSize = blockSize;
+		return blockSize;
 	}
 
 	public void setHeadLocation(int x, int y) {
-		myHeadLocation.setX(x);
-		myHeadLocation.setY(y);
+		headLocation.setX(x);
+		headLocation.setY(y);
 	}
 
 	public Point getHeadLocation() {
-		return myHeadLocation;
+		return headLocation;
 	}
 
 	public List<Point> getTail() {
-		return myTail;
+		return tail;
 	}
 
 }

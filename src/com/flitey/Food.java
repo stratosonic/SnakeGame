@@ -1,19 +1,19 @@
 package com.flitey;
 
 public class Food {
-	Point myLocation;
+	Point location;
 
 	public Food(int x, int y) {
-		myLocation = new Point(x, y);
+		location = new Point(x, y);
 	}
 
 	public Point getLocation() {
-		return myLocation;
+		return location;
 	}
 
 	@Override
 	public String toString() {
-		return "Food [myLocation=" + myLocation + "]";
+		return "Food [myLocation=" + location + "]";
 	}
 
 }

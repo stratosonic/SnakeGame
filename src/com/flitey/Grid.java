@@ -41,18 +41,6 @@ public class Grid {
 		System.out.println(food.toString());
 	}
 
-	public int getHeight() {
-		return height;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public int getPixelsPerSquare() {
-		return pixelsPerSquare;
-	}
-
 	public Food getFood() {
 		return food;
 	}

@@ -32,14 +32,13 @@ public class SnakeGame extends Application {
 	private static final int WINDOW_WIDTH = 400;
 	private static final int GRID_BLOCK_SIZE = 10;
 
-	GraphicsContext graphicsContext;
-	Button startButton;
-
-	Snake snake;
-	Grid grid;
-	AnimationTimer animationTimer;
-	Timer timer;
-	TimerTask task;
+	private GraphicsContext graphicsContext;
+	private Button startButton;
+	private Snake snake;
+	private Grid grid;
+	private AnimationTimer animationTimer;
+	private Timer timer;
+	private TimerTask task;
 
 	private boolean isGameInProgress = false;
 	private boolean isGameOver = false;
@@ -56,7 +55,6 @@ public class SnakeGame extends Application {
 		Scene scene = new Scene(root);
 
 		grid = new Grid(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_BLOCK_SIZE);
-
 		snake = new Snake(WINDOW_WIDTH, WINDOW_HEIGHT, GRID_BLOCK_SIZE);
 		snake.setHeadLocation(GRID_BLOCK_SIZE, GRID_BLOCK_SIZE);
 
@@ -189,13 +187,6 @@ public class SnakeGame extends Application {
 		graphicsContext.fillText(gameOverText, (WINDOW_WIDTH / 2) - (textWidth / 2), WINDOW_HEIGHT / 2 - 24);
 	}
 
-	private double getTextWidth(String string) {
-		Text text = new Text(string);
-		new Scene(new Group(text));
-		text.applyCss();
-		return text.getLayoutBounds().getWidth();
-	}
-
 	private void drawGrid() {
 		graphicsContext.setFill(Color.WHITE);
 		graphicsContext.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -226,6 +217,13 @@ public class SnakeGame extends Application {
 		graphicsContext.setFill(Color.BLUE);
 		graphicsContext.fillRect(grid.getFood().getLocation().getX(), grid.getFood().getLocation().getY(),
 				GRID_BLOCK_SIZE, GRID_BLOCK_SIZE);
+	}
+
+	private double getTextWidth(String string) {
+		Text text = new Text(string);
+		new Scene(new Group(text));
+		text.applyCss();
+		return text.getLayoutBounds().getWidth();
 	}
 
 }
